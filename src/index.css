@@ -1,0 +1,27 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+*{
+   margin : 0;
+   padding: 0;
+   box-sizing: box-border m-0 p-0;
+   font-family: "Poppins", sans-serif;
+}
+
+html,body{
+   height : 100%;
+   width : 100%;
+}
+
+input:focus ~ span{
+  color: #00dfc4;
+  border: 1px solid #00dfc4;
+  background: #223243;
+  transform: translateX(25px) translateY(-7px);
+  font-size: 0.6em;
+  padding: 0 8px;
+  border-radius: 10px;
+  letter-spacing: 0.1em;
+  transition: 0.5s;
+}
