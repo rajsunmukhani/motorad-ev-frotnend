@@ -17,20 +17,18 @@ const Login = () => {
 
   const submitHandler = async (e) => {
     e.preventDefault();
-
     try {
-      const response = await instance.post('/signin', formData);
-
-      // Check if the success field is true (not a string comparison)
-      if (response.data.success) {
-        navigate('/home'); // navigate to home on successful login
-      } else {
-        console.log('Error: ', response.data.message || 'Login failed');
-      }
+        const response = await instance.post('/signin', formData);
+        
+        // Store the token in localStorage
+        if (response.data.success) {
+            localStorage.setItem('token', response.data.token);
+            navigate('/home'); // Navigate to a protected page
+        } else {
+            console.log('Login failed');
+        }
     } catch (error) {
-      // Handling errors
-      console.error('Error logging in:', error.response?.data.message || error.message);
-      alert(error.response?.data.message || 'An error occurred. Please try again.');
+        console.error('Error logging in:', error.response?.data || error.message);
     }
   };
 
@@ -85,7 +83,7 @@ const Login = () => {
 
           <p className='text-[rgba(255,255,255,0.5)] text-[0.75em] font-light'>
             Not Registered?{" "}
-            <Link to="/signup" className="font-medium text-white">
+            <Link to="/" className="font-medium text-white">
               Create an account
             </Link>
           </p>

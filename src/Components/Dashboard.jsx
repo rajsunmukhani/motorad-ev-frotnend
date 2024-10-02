@@ -1,24 +1,46 @@
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import Nav from './Partials/Nav';
 import CardWallet from './Partials/CardWallet';
+import Logout from './Partials/Logout';
+import {jwtDecode} from 'jwt-decode';
+import { useEffect, useState } from 'react';
 
 const Dashboard = () => {
+  const [user, setUser] = useState({ name: '', avatar: '' });
+
+  useEffect(() => {
+    const token = localStorage.getItem('token'); // Retrieve the token from localStorage
+
+    if (token) {
+      try {
+        const decoded = jwtDecode(token); // Decode the token
+        // Set the user state with the decoded data
+        setUser({
+          name: decoded.name,
+          avatar: decoded.avatar,
+        });
+      } catch (error) {
+        console.error('Token decoding failed:', error);
+      }
+    }
+  }, []);
+
+  console.log(user);
+
   return (
     <div className='w-full bg-[#223243] h-screen flex'>
-      <Nav /> 
-      <CardWallet />
+      <Nav avatar={user.avatar.url} />
+      <CardWallet name={user.name} />
 
       <div className="p3 h-screen gap-3 w-[30%] items-center flex flex-col border-l border-l-[#888]">
-        <div className='w-[90%] h-[15%] flex justify-end items-center'>
-          <button className='text-red-500 hover:scale-105 bg-gray-700 shadow-xl border w-fit h-fit border-zinc-600 py-2 px-5 rounded-lg shadow-[5px_10px_15px_rgba(255,255,255,0.1),5px_5px_15px_rgba(0,0,0,0.35)]'>Logout ?</button>
-        </div>
+        <Logout />
         <div className='border h-[80%] w-[90%] rounded-xl shadow-[-5px_-5px_15px_rgba(255,255,255,0.1),5px_5px_15px_rgba(0,0,0,0.35)] flex flex-col p-5 gap-5 items-center'>
           <div className='flex justify-between items-center w-full'>
             <h1 className='text-white text-xl'>Details</h1>
             <h1 className='text-white text-xl border rounded-full px-2'>+</h1>
           </div>
           <div className="card flex justify-center items-center flex-col cursor-pointer bg-red-200 rounded-lg h-40 w-80">
-
+            {/* Additional content can go here */}
           </div>
           <div className='w-full text-white border-b pb-5 uppercase'>
             <div>
@@ -58,12 +80,10 @@ const Dashboard = () => {
               Transactions!
             </a>
           </div>
-          
         </div>
-      </div> 
+      </div>
     </div>
+  );
+};
 
-  )
-}
-
-export default Dashboard
+export default Dashboard;
