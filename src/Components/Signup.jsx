@@ -141,7 +141,7 @@ const Signup = () => {
           </p>
         </form>
       </div>
-      <GoogleButton />
+      <GoogleButton message={'Sign up with Google'} />
     </div>
   );
 };

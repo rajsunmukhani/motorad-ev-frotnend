@@ -2,6 +2,7 @@ import '@fortawesome/fontawesome-free/css/all.min.css';
 import { instance } from '../utils/axios';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import GoogleButton from './Partials/GoogleButton';
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -34,7 +35,7 @@ const Login = () => {
 
 
   return (
-    <div className='bg-[#223243] w-full h-screen flex items-center justify-center'>
+    <div className='bg-[#223243] w-full h-screen flex-col gap-3 flex items-center justify-center'>
       <div className="shadow-[-5px_-5px_15px_rgba(255,255,255,0.1),5px_5px_15px_rgba(0,0,0,0.35),inset_-5px_-5px_15px_rgba(255,255,255,0.1),inset_5px_5px_15px_rgba(0,0,0,0.35)] p-10 rounded-[20px] border-8 border-solid border-[#223243]">
         <form onSubmit={submitHandler} className="flex justify-center items-center flex-col gap-[25px]">
           <h2 className='text-white font-medium text-2xl tracking-tighter'>Sign In</h2>
@@ -89,6 +90,7 @@ const Login = () => {
           </p>
         </form>
       </div>
+      <GoogleButton message={'Sign in With Google'} />
     </div>
   );
 };

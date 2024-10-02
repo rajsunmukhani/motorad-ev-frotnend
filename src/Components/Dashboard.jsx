@@ -13,8 +13,7 @@ const Dashboard = () => {
 
     if (token) {
       try {
-        const decoded = jwtDecode(token); // Decode the token
-        // Set the user state with the decoded data
+        const decoded = jwtDecode(token); 
         setUser({
           name: decoded.name,
           avatar: decoded.avatar,

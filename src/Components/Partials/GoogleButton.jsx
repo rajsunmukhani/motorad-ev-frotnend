@@ -1,6 +1,6 @@
 import React from 'react';
 
-const GoogleButton = () => {
+const GoogleButton = ({message}) => {
   return (
     <a href={'http://localhost:4000/auth/google'} className="flex items-center justify-between w-fit overflow-hidden h-14 bg-blue-600 rounded-full shadow-lg transition-all duration-300 ease-in-out hover:shadow-[0_0_3px_3px_rgba(66,133,244,0.3)] active:bg-blue-700">
       <div className="flex items-center justify-around w-12 h-full bg-white">
@@ -32,7 +32,7 @@ const GoogleButton = () => {
           </g>
         </svg>
       </div>
-      <p className="text-white text-sm font-medium tracking-tight ml-4 mr-4 flex items-center">Sign up with Google</p>
+      <p className="text-white text-sm font-medium tracking-tight ml-4 mr-4 flex items-center">{message}</p>
     </a>
   );
 };
