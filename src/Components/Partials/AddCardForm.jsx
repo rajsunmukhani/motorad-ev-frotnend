@@ -7,21 +7,56 @@ const AddCardForm = ({ onClose, userId, onCardAdded }) => {
     const [expiryDate, setExpiryDate] = useState("");
     const [nameOnCard, setNameOnCard] = useState("");
     const [bankName, setBankName] = useState("");
+    const [limitOfCard, setLimitOfCard] = useState("");
+    const [usedLimit, setUsedLimit] = useState("");
+    
+    const token = localStorage.getItem("token");
+
+    const handleCardNumberChange = (e) => {
+        const value = e.target.value.replace(/\D/g, "");
+        const formattedCardNumber = value.match(/.{1,4}/g)?.join(" ") || "";
+        setCardNumber(formattedCardNumber);
+    };
+
+    const handleExpiryDateChange = (e) => {
+        let value = e.target.value.replace(/\D/g, "");
+        if (value.length >= 1 && value.length <= 2) {
+            if (value.length === 1 && parseInt(value, 10) > 1) {
+                value = `0${value}`;
+            } else if (value.length === 2 && parseInt(value, 10) > 12) {
+                value = "12";
+            }
+        }
+        if (value.length > 2) {
+            value = `${value.slice(0, 2)}/${value.slice(2, 4)}`;
+        }
+        setExpiryDate(value);
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        const cardData = {
+        if (parseFloat(limitOfCard) <= 0) {
+            alert("Limit of Card cannot be zero or negative.");
+            return;
+        }
+
+        const newCard = {
             cardNumber,
             expiryDate,
             cvv,
             nameOnCard,
             bankName,
+            limitOfCard,
+            usedLimit
         };
 
+        onCardAdded(newCard);
+
         try {
-            const response = await instance.post('/add-card', cardData);
-            onCardAdded(response.data);
+            await instance.post('/add-card', newCard, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
             onClose();
         } catch (error) {
             console.error('Error adding card:', error);
@@ -37,8 +72,9 @@ const AddCardForm = ({ onClose, userId, onCardAdded }) => {
                         type="text"
                         placeholder="Card Number"
                         value={cardNumber}
-                        onChange={(e) => setCardNumber(e.target.value)}
+                        onChange={handleCardNumberChange}
                         required
+                        maxLength="19"
                         className="w-full p-2 mb-4 border border-gray-600 rounded bg-gray-700 text-white"
                     />
                     <input
@@ -47,14 +83,16 @@ const AddCardForm = ({ onClose, userId, onCardAdded }) => {
                         value={cvv}
                         onChange={(e) => setCvv(e.target.value)}
                         required
+                        maxLength="3"
                         className="w-full p-2 mb-4 border border-gray-600 rounded bg-gray-700 text-white"
                     />
                     <input
                         type="text"
                         placeholder="Expiry Date (MM/YY)"
                         value={expiryDate}
-                        onChange={(e) => setExpiryDate(e.target.value)}
+                        onChange={handleExpiryDateChange}
                         required
+                        maxLength="5"
                         className="w-full p-2 mb-4 border border-gray-600 rounded bg-gray-700 text-white"
                     />
                     <input
@@ -71,6 +109,24 @@ const AddCardForm = ({ onClose, userId, onCardAdded }) => {
                         value={bankName}
                         onChange={(e) => setBankName(e.target.value)}
                         required
+                        className="w-full p-2 mb-4 border border-gray-600 rounded bg-gray-700 text-white"
+                    />
+                    <input
+                        type="number"
+                        placeholder="Limit of Card (₹)"
+                        value={limitOfCard}
+                        onChange={(e) => setLimitOfCard(e.target.value)}
+                        required
+                        min="1"
+                        className="w-full p-2 mb-4 border border-gray-600 rounded bg-gray-700 text-white"
+                    />
+                    <input
+                        type="number"
+                        placeholder="Used Limit (₹)"
+                        value={usedLimit}
+                        onChange={(e) => setUsedLimit(e.target.value)}
+                        required
+                        min="0"
                         className="w-full p-2 mb-4 border border-gray-600 rounded bg-gray-700 text-white"
                     />
                     <button

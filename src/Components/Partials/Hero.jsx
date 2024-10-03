@@ -26,9 +26,10 @@ const Hero = () => {
 
     // Handle when a new card is added
     const handleCardAdded = (newCardData) => {
-        setCreditCards((prevCards) => [...prevCards, newCardData]);
-        setShowAddCardForm(false); // Close the form after adding the card
+        setCreditCards((prevCards) => [...prevCards, newCardData]); // Update the card list dynamically
+        setShowAddCardForm(false); // Close the form
     };
+    
 
     const isAddCardDisabled = creditCards.length >= 5;
 
