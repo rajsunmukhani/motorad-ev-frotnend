@@ -7,9 +7,9 @@ const AddCardForm = ({ onClose, userId, onCardAdded }) => {
     const [expiryDate, setExpiryDate] = useState("");
     const [nameOnCard, setNameOnCard] = useState("");
     const [bankName, setBankName] = useState("");
-    const [limitOfCard, setLimitOfCard] = useState("");
-    const [usedLimit, setUsedLimit] = useState("");
-    
+    const [limit, setLimit] = useState("");
+    const [usedAmount, setUsedLimit] = useState("");
+
     const token = localStorage.getItem("token");
 
     const handleCardNumberChange = (e) => {
@@ -33,11 +33,57 @@ const AddCardForm = ({ onClose, userId, onCardAdded }) => {
         setExpiryDate(value);
     };
 
+    const validateForm = () => {
+        const cardDigits = cardNumber.replace(/\s/g, "").length;
+
+        // Expiry date validation
+        const currentYear = new Date().getFullYear() % 100;
+        const currentMonth = new Date().getMonth() + 1;
+        const [expMonth, expYear] = expiryDate.split("/").map(Number);
+        const isExpired = expYear > currentYear + 6 || (expYear === currentYear && expMonth < currentMonth);
+
+        if (cardDigits !== 16) {
+            alert("Card number must be 16 digits.");
+            return false;
+        }
+
+        if (cvv.length !== 3) {
+            alert("CVV must be exactly 3 digits.");
+            return false;
+        }
+
+        if (isNaN(expMonth) || isNaN(expYear) || expYear < currentYear || isExpired) {
+            alert("Expiry date is invalid.");
+            return false;
+        }
+
+        if (nameOnCard.length < 3 || nameOnCard.length > 20) {
+            alert("Enter the Correct Name on the card.");
+            return false;
+        }
+
+        if (bankName.length < 3 || bankName.length > 35) {
+            alert("Enter correct Bank Name.");
+            return false;
+        }
+
+        if (parseFloat(usedAmount) > parseFloat(limit)) {
+            alert("Used limit cannot exceed the card's limit.");
+            return false;
+        }
+
+        if (parseFloat(limit) <= 0) {
+            alert("Limit of Card cannot be zero or negative.");
+            return false;
+        }
+
+        return true;
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (parseFloat(limitOfCard) <= 0) {
-            alert("Limit of Card cannot be zero or negative.");
+        if (!validateForm()) {
             return;
         }
 
@@ -47,8 +93,8 @@ const AddCardForm = ({ onClose, userId, onCardAdded }) => {
             cvv,
             nameOnCard,
             bankName,
-            limitOfCard,
-            usedLimit
+            limit,
+            usedAmount
         };
 
         onCardAdded(newCard);
@@ -114,8 +160,8 @@ const AddCardForm = ({ onClose, userId, onCardAdded }) => {
                     <input
                         type="number"
                         placeholder="Limit of Card (₹)"
-                        value={limitOfCard}
-                        onChange={(e) => setLimitOfCard(e.target.value)}
+                        value={limit}
+                        onChange={(e) => setLimit(e.target.value)}
                         required
                         min="1"
                         className="w-full p-2 mb-4 border border-gray-600 rounded bg-gray-700 text-white"
@@ -123,7 +169,7 @@ const AddCardForm = ({ onClose, userId, onCardAdded }) => {
                     <input
                         type="number"
                         placeholder="Used Limit (₹)"
-                        value={usedLimit}
+                        value={usedAmount}
                         onChange={(e) => setUsedLimit(e.target.value)}
                         required
                         min="0"

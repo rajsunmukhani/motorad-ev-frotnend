@@ -8,13 +8,27 @@ const Hero = () => {
     const [showAddCardForm, setShowAddCardForm] = useState(false);
     const token = localStorage.getItem("token");
 
+    const [totalLimit, setTotalLimit] = useState(0);
+    const [totalExpenditure, setTotalExpenditure] = useState(0);
+    const [totalBalance, setTotalBalance] = useState(0);
+
     // Fetching the existing credit cards from the server
     const fetchCreditCards = async () => {
         try {
-            const response = await instance.get(`/user/${token}`, {
-                headers: { Authorization: `Bearer ${token}` },
+            const response = await instance.get(`/user/₹{token}`, {
+                headers: { Authorization: `Bearer ₹{token}` },
             });
-            setCreditCards(response.data.creditCards);
+            const cards = response.data.creditCards;
+            setCreditCards(cards);
+
+            // Calculate total limit, total expenditure, and total balance
+            const limit = cards.reduce((acc, card) => acc + card.limit, 0);
+            const expenditure = cards.reduce((acc, card) => acc + card.usedAmount, 0);
+            const balance = limit - expenditure;
+
+            setTotalLimit(limit);
+            setTotalExpenditure(expenditure);
+            setTotalBalance(balance);
         } catch (error) {
             console.error("Error fetching credit cards:", error);
         }
@@ -30,14 +44,14 @@ const Hero = () => {
         setShowAddCardForm(false); // Close the form
     };
     
-
     const isAddCardDisabled = creditCards.length >= 5;
 
-    // Format the card number to display only the last 4 digits
+    // Format the card number to display only the last 4 digits, keeping spaces intact
     const formatCardNumber = (cardNumber) => {
-        return cardNumber.length <= 4 
-            ? cardNumber 
-            : 'X'.repeat(cardNumber.length - 4) + cardNumber.slice(-4);
+        const visibleDigits = cardNumber.slice(-4); // Last 4 digits of the card
+        const hiddenPart = cardNumber.slice(0, -4).replace(/\d/g, 'X'); // Replace digits with 'X'
+        
+        return hiddenPart + visibleDigits;
     };
 
     return (
@@ -101,21 +115,21 @@ const Hero = () => {
                         <div className="box bg-blue-200 h-8 w-8 rounded-lg"></div>
                         <div className="summ leading-tight">
                             <h5>Total Limit</h5>
-                            <h3 className="text-2xl font-black">$ 1234</h3>
+                            <h3 className="text-2xl font-black">₹{totalLimit}</h3>
                         </div>
                     </div>
                     <div className="flex items-center justify-center gap-3">
                         <div className="box bg-gray-200 h-8 w-8 rounded-lg"></div>
                         <div className="summ leading-tight">
                             <h5>Total Expenditure</h5>
-                            <h3 className="text-2xl font-black">$ 1234</h3>
+                            <h3 className="text-2xl font-black">₹{totalExpenditure}</h3>
                         </div>
                     </div>
                     <div className="flex items-center justify-center gap-3">
                         <div className="box bg-yellow-200 h-8 w-8 rounded-lg"></div>
                         <div className="summ leading-tight">
                             <h5>Total Balance</h5>
-                            <h3 className="text-2xl font-black">$ 1234</h3>
+                            <h3 className="text-2xl font-black">₹{totalBalance}</h3>
                         </div>
                     </div>
                 </div>
