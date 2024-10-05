@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { instance } from "../../utils/axios";
 
-const AddCardForm = ({ onClose, userId, onCardAdded }) => {
+const AddCardForm = ({ onClose, onCardAdded }) => {
     const [cardNumber, setCardNumber] = useState("");
     const [cvv, setCvv] = useState("");
     const [expiryDate, setExpiryDate] = useState("");
@@ -13,67 +13,55 @@ const AddCardForm = ({ onClose, userId, onCardAdded }) => {
     const token = localStorage.getItem("token");
 
     const handleCardNumberChange = (e) => {
-        const value = e.target.value.replace(/\D/g, "");
-        const formattedCardNumber = value.match(/.{1,4}/g)?.join(" ") || "";
+        const value = e.target.value.replace(/\D/g, ""); 
+        const formattedCardNumber = value.match(/.{1,4}/g)?.join(" ") || ""; 
         setCardNumber(formattedCardNumber);
     };
 
     const handleExpiryDateChange = (e) => {
-        let value = e.target.value.replace(/\D/g, "");
-        if (value.length >= 1 && value.length <= 2) {
-            if (value.length === 1 && parseInt(value, 10) > 1) {
-                value = `0${value}`;
-            } else if (value.length === 2 && parseInt(value, 10) > 12) {
-                value = "12";
-            }
-        }
+        let value = e.target.value.replace(/\D/g, ""); 
         if (value.length > 2) {
-            value = `${value.slice(0, 2)}/${value.slice(2, 4)}`;
+            value = `${value.slice(0, 2)}/${value.slice(2, 4)}`; 
         }
         setExpiryDate(value);
     };
 
     const validateForm = () => {
         const cardDigits = cardNumber.replace(/\s/g, "").length;
-
-        // Expiry date validation
-        const currentYear = new Date().getFullYear() % 100;
+        const currentYear = new Date().getFullYear() % 100; 
         const currentMonth = new Date().getMonth() + 1;
         const [expMonth, expYear] = expiryDate.split("/").map(Number);
-        const isExpired = expYear > currentYear + 6 || (expYear === currentYear && expMonth < currentMonth);
+
+        
+        const limitValue = parseFloat(limit);
+        const usedAmountValue = parseFloat(usedAmount);
 
         if (cardDigits !== 16) {
             alert("Card number must be 16 digits.");
             return false;
         }
-
         if (cvv.length !== 3) {
             alert("CVV must be exactly 3 digits.");
             return false;
         }
-
-        if (isNaN(expMonth) || isNaN(expYear) || expYear < currentYear || isExpired) {
+        if (isNaN(expMonth) || isNaN(expYear) || expYear < currentYear || (expYear === currentYear && expMonth < currentMonth)) {
             alert("Expiry date is invalid.");
             return false;
         }
-
         if (nameOnCard.length < 3 || nameOnCard.length > 20) {
-            alert("Enter the Correct Name on the card.");
+            alert("Name on card must be between 3 and 20 characters.");
             return false;
         }
-
         if (bankName.length < 3 || bankName.length > 35) {
-            alert("Enter correct Bank Name.");
+            alert("Bank name must be between 3 and 35 characters.");
             return false;
         }
-
-        if (parseFloat(usedAmount) > parseFloat(limit)) {
-            alert("Used limit cannot exceed the card's limit.");
+        if (usedAmountValue > limitValue) {
+            alert("Used amount cannot exceed the card limit.");
             return false;
         }
-
-        if (parseFloat(limit) <= 0) {
-            alert("Limit of Card cannot be zero or negative.");
+        if (limitValue <= 0) {
+            alert("Card limit must be greater than zero.");
             return false;
         }
 
@@ -87,25 +75,26 @@ const AddCardForm = ({ onClose, userId, onCardAdded }) => {
             return;
         }
 
+        
         const newCard = {
             cardNumber,
             expiryDate,
             cvv,
             nameOnCard,
             bankName,
-            limit,
-            usedAmount
+            limit: parseFloat(limit), 
+            usedAmount: parseFloat(usedAmount), 
         };
 
-        onCardAdded(newCard);
-
         try {
-            await instance.post('/add-card', newCard, {
+            await instance.post("/add-card", newCard, {
                 headers: { Authorization: `Bearer ${token}` },
             });
-            onClose();
+
+            onCardAdded(newCard); 
+            onClose(); 
         } catch (error) {
-            console.error('Error adding card:', error);
+            console.error("Error adding card:", error);
         }
     };
 

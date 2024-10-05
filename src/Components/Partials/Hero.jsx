@@ -7,55 +7,54 @@ const Hero = () => {
     const [creditCards, setCreditCards] = useState([]);
     const [showAddCardForm, setShowAddCardForm] = useState(false);
     const token = localStorage.getItem("token");
-
     const [totalLimit, setTotalLimit] = useState(0);
     const [totalExpenditure, setTotalExpenditure] = useState(0);
     const [totalBalance, setTotalBalance] = useState(0);
 
-    // Fetching the existing credit cards from the server
+    const calculateTotals = (cards) => {
+        const limit = cards.reduce((acc, card) => acc + card.limit, 0);
+        const expenditure = cards.reduce((acc, card) => acc + card.usedAmount, 0);
+        const balance = limit - expenditure;
+
+        setTotalLimit(limit);
+        setTotalExpenditure(expenditure);
+        setTotalBalance(balance);
+    };
+
     const fetchCreditCards = async () => {
         try {
-            const response = await instance.get(`/user/₹{token}`, {
-                headers: { Authorization: `Bearer ₹{token}` },
+            const response = await instance.get(`/user/${token}`, {
+                headers: { Authorization: `Bearer ${token}` },
             });
             const cards = response.data.creditCards;
             setCreditCards(cards);
-
-            // Calculate total limit, total expenditure, and total balance
-            const limit = cards.reduce((acc, card) => acc + card.limit, 0);
-            const expenditure = cards.reduce((acc, card) => acc + card.usedAmount, 0);
-            const balance = limit - expenditure;
-
-            setTotalLimit(limit);
-            setTotalExpenditure(expenditure);
-            setTotalBalance(balance);
+            calculateTotals(cards); // Recalculate totals after fetching cards
         } catch (error) {
             console.error("Error fetching credit cards:", error);
         }
     };
 
     useEffect(() => {
-        fetchCreditCards();
+        if (token) fetchCreditCards();
     }, [token]);
 
-    // Handle when a new card is added
     const handleCardAdded = (newCardData) => {
-        setCreditCards((prevCards) => [...prevCards, newCardData]); // Update the card list dynamically
-        setShowAddCardForm(false); // Close the form
+        const updatedCards = [...creditCards, newCardData];
+        setCreditCards(updatedCards);
+        calculateTotals(updatedCards); // Recalculate totals when a new card is added
+        setShowAddCardForm(false);
     };
-    
+
     const isAddCardDisabled = creditCards.length >= 5;
 
-    // Format the card number to display only the last 4 digits, keeping spaces intact
     const formatCardNumber = (cardNumber) => {
-        const visibleDigits = cardNumber.slice(-4); // Last 4 digits of the card
-        const hiddenPart = cardNumber.slice(0, -4).replace(/\d/g, 'X'); // Replace digits with 'X'
-        
+        const visibleDigits = cardNumber.slice(-4);
+        const hiddenPart = cardNumber.slice(0, -4).replace(/\d/g, 'X');
         return hiddenPart + visibleDigits;
     };
 
     return (
-        <div className="w-[90%] flex flex-col gap-5 min-h-[65%] border rounded-2xl p-5 shadow-[-5px_-5px_15px_rgba(255,255,255,0.1),5px_5px_15px_rgba(0,0,0,0.35)]">
+        <div className="w-[90%] flex flex-col gap-5 min-h-[65%] max-h-[80%] border rounded-2xl p-5 shadow">
             <div className="flex justify-between w-full items-center">
                 <h1 className="text-white text-xl">Details</h1>
                 <i className="fa-solid fa-grip text-white border rounded-full p-3"></i>
@@ -110,7 +109,7 @@ const Hero = () => {
                     />
                 )}
 
-                <div className="flex py-5 border items-center text-zinc-400 justify-center gap-10 rounded-lg">
+                <div className="dets flex py-5 border items-center text-zinc-400 justify-center gap-10 rounded-lg">
                     <div className="flex items-center justify-center gap-3 py-4">
                         <div className="box bg-blue-200 h-8 w-8 rounded-lg"></div>
                         <div className="summ leading-tight">
