@@ -4,11 +4,11 @@ import AddCardForm from "./AddCardForm";
 import EnterOTPForm from "./EnterOTPForm";
 import { getRandomColor } from "../../utils/RandomColours";
 
-const Hero = () => {
+const Hero = ({ setSelectedCard }) => {
     const [creditCards, setCreditCards] = useState([]);
     const [showAddCardForm, setShowAddCardForm] = useState(false);
     const [showOTPForm, setShowOTPForm] = useState(false);
-    const [selectedCard, setSelectedCard] = useState(null); // Track selected card
+    const [selectedCard, setSelectedCardState] = useState(null); // Track selected card
     const [totalLimit, setTotalLimit] = useState(0);
     const [totalExpenditure, setTotalExpenditure] = useState(0);
     const [totalBalance, setTotalBalance] = useState(0);
@@ -59,7 +59,8 @@ const Hero = () => {
     };
 
     const handleCardClick = async (card) => {
-        setSelectedCard(card);
+        setSelectedCard(card); // Update the selected card in the parent component
+        setSelectedCardState(card); // Update the local state for OTP
         setShowOTPForm(true);
         try {
             // Send OTP to the user's email
@@ -72,21 +73,22 @@ const Hero = () => {
     // Handle OTP submission
     const handleOTPSubmit = async (otp) => {
         try {
-            // Verify the OTP via an API call
             const response = await instance.post('/verify-otp', { otp, email: userEmail });
             if (response.data.success) {
                 setOtpVerificationSuccess(true);
+                setSelectedCard(selectedCard); // Pass the card to parent component only after successful OTP
                 console.log(`OTP Verified. Card details: ${JSON.stringify(selectedCard)}`);
-                // Display card details to the user
-                // You can customize this part based on how you want to show the card data
             } else {
                 alert("Invalid OTP. Please try again.");
+                setOtpVerificationSuccess(false); // Reset OTP verification status on failure
+                setSelectedCard(null); // Clear the selected card if OTP is wrong
             }
         } catch (error) {
             console.error("Error verifying OTP:", error);
         }
-        setShowOTPForm(false); // Close the form after verification
+        setShowOTPForm(false); // Close the OTP form regardless of success or failure
     };
+    
 
     const handleOTPCancel = () => {
         setShowOTPForm(false); // Close the form
@@ -156,19 +158,6 @@ const Hero = () => {
                         onClose={handleOTPCancel} 
                         onSubmit={handleOTPSubmit} 
                     />
-                )}
-
-                {/* Display card details if OTP was successfully verified */}
-                {otpVerificationSuccess && selectedCard && (
-                    <div className="flex flex-col gap-5">
-                        <h2 className="text-white">Card Details:</h2>
-                        <div className="bg-gray-800 rounded-lg p-4">
-                            <h3 className="text-white">Name: {selectedCard.nameOnCard}</h3>
-                            <h3 className="text-white">Card Number: {formatCardNumber(selectedCard.cardNumber)}</h3>
-                            <h3 className="text-white">Limit: ₹{selectedCard.limit}</h3>
-                            <h3 className="text-white">Used Amount: ₹{selectedCard.usedAmount}</h3>
-                        </div>
-                    </div>
                 )}
 
                 <div className="dets flex py-5 border items-center text-zinc-400 justify-center gap-10 rounded-lg">
